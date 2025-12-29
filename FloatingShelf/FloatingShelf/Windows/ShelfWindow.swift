@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import Quartz
 
 class ShelfWindow: NSPanel {
     
@@ -35,7 +36,7 @@ class ShelfWindow: NSPanel {
         level = .floating
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         isFloatingPanel = true
-        becomesKeyOnlyIfNeeded = true
+        becomesKeyOnlyIfNeeded = false  // Allow keyboard events
         
         // Transparent window background for rounded corners
         backgroundColor = .clear
@@ -76,5 +77,74 @@ class ShelfWindow: NSPanel {
     
     override var canBecomeMain: Bool {
         return false
+    }
+    
+    // MARK: - Quick Look Support
+    
+    private var localEventMonitor: Any?
+    
+    override func sendEvent(_ event: NSEvent) {
+        // Intercept space bar before it reaches first responder
+        if event.type == .keyDown && event.keyCode == 49 {
+            toggleQuickLook()
+            return  // Don't forward to responder chain
+        }
+        super.sendEvent(event)
+    }
+    
+    func setupQuickLookMonitor() {
+        // Remove existing monitors first
+        removeQuickLookMonitor()
+        
+        // LOCAL monitor for when this app is active
+        localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            if event.keyCode == 49 { // Space bar
+                if let panel = QLPreviewPanel.shared(), panel.isVisible {
+                    panel.orderOut(nil)
+                    return nil  // Consume event
+                }
+            }
+            return event
+        }
+        
+        // GLOBAL monitor for when another app/window has focus
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
+            if event.keyCode == 49 { // Space bar
+                if let panel = QLPreviewPanel.shared(), panel.isVisible {
+                    DispatchQueue.main.async {
+                        panel.orderOut(nil)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var globalEventMonitor: Any?
+    
+    func removeQuickLookMonitor() {
+        if let monitor = localEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            localEventMonitor = nil
+        }
+        if let monitor = globalEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalEventMonitor = nil
+        }
+    }
+    
+    private func toggleQuickLook() {
+        guard let panel = QLPreviewPanel.shared() else { return }
+        
+        if panel.isVisible {
+            panel.orderOut(nil)
+            removeQuickLookMonitor()
+        } else {
+            setupQuickLookMonitor()
+            panel.makeKeyAndOrderFront(nil)
+        }
+    }
+    
+    deinit {
+        removeQuickLookMonitor()
     }
 }

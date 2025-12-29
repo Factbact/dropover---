@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import Quartz
 
 class ShelfViewController: NSViewController {
     
@@ -45,6 +46,19 @@ class ShelfViewController: NSViewController {
             dropView.registerForDraggedTypes(dropReceiver.acceptedTypes)
         }
     }
+    
+    // MARK: - Keyboard Events
+    
+    override func keyDown(with event: NSEvent) {
+        // Space bar = Quick Look
+        if event.keyCode == 49 && !selectedItems.isEmpty {
+            showQuickLook()
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+    
+    override var acceptsFirstResponder: Bool { true }
     
     // MARK: - UI Setup
     
@@ -304,6 +318,29 @@ class ShelfViewController: NSViewController {
         }
     }
     
+    // MARK: - Quick Look
+    
+    private func showQuickLook() {
+        guard !selectedItems.isEmpty else { return }
+        
+        if let panel = QLPreviewPanel.shared() {
+            panel.makeKeyAndOrderFront(nil)
+        }
+    }
+    
+    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+        return true
+    }
+    
+    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        panel.delegate = self
+        panel.dataSource = self
+    }
+    
+    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        // Nothing to clean up
+    }
+    
     // MARK: - Data
     
     private func loadItems() {
@@ -389,6 +426,11 @@ extension ShelfViewController: ActionBarDelegate {
         shareItems(selectedItemsArray)
     }
     
+    func actionBarDidRequestAirDrop(_ actionBar: ActionBarView) {
+        let selectedItemsArray = items.filter { selectedItems.contains($0.id) }
+        airDropItems(selectedItemsArray)
+    }
+    
     func actionBarDidRequestCopy(_ actionBar: ActionBarView) {
         let selectedItemsArray = items.filter { selectedItems.contains($0.id) }
         copyItems(selectedItemsArray)
@@ -440,6 +482,41 @@ extension ShelfViewController: ActionBarDelegate {
         let sharingPicker = NSSharingServicePicker(items: sharingItems)
         if let button = actionBar.shareButton {
             sharingPicker.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        }
+    }
+    
+    private func airDropItems(_ items: [ShelfItem]) {
+        var sharingItems: [URL] = []
+        
+        for item in items {
+            if let path = item.payloadPath {
+                if let storageDir = try? FileManager.default.shelfStorageDirectory() {
+                    let fileURL = storageDir.appendingPathComponent(path)
+                    if FileManager.default.fileExists(atPath: fileURL.path) {
+                        sharingItems.append(fileURL)
+                    }
+                }
+            }
+        }
+        
+        guard !sharingItems.isEmpty else {
+            let alert = NSAlert()
+            alert.messageText = "No files to share"
+            alert.informativeText = "Select files to share via AirDrop."
+            alert.runModal()
+            return
+        }
+        
+        // Use AirDrop service directly
+        if let airDropService = NSSharingService(named: .sendViaAirDrop) {
+            if airDropService.canPerform(withItems: sharingItems) {
+                airDropService.perform(withItems: sharingItems)
+            } else {
+                let alert = NSAlert()
+                alert.messageText = "AirDrop Unavailable"
+                alert.informativeText = "Please enable AirDrop in Control Center or System Settings."
+                alert.runModal()
+            }
         }
     }
     
@@ -545,3 +622,31 @@ class DropView: NSView {
     }
 }
 
+// MARK: - QLPreviewPanel DataSource & Delegate
+
+extension ShelfViewController: QLPreviewPanelDataSource, QLPreviewPanelDelegate {
+    
+    func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+        return selectedItems.count
+    }
+    
+    func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> (any QLPreviewItem)! {
+        let selectedArray = items.filter { selectedItems.contains($0.id) }
+        guard index < selectedArray.count else { return nil }
+        
+        let item = selectedArray[index]
+        
+        // Get file URL
+        if let payloadPath = item.payloadPath {
+            do {
+                let storageDir = try FileManager.default.shelfStorageDirectory()
+                let fileURL = storageDir.appendingPathComponent(payloadPath)
+                return fileURL as NSURL
+            } catch {
+                return nil
+            }
+        }
+        
+        return nil
+    }
+}

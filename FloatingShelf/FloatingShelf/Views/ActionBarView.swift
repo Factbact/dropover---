@@ -7,6 +7,7 @@ import Cocoa
 
 protocol ActionBarDelegate: AnyObject {
     func actionBarDidRequestShare(_ actionBar: ActionBarView)
+    func actionBarDidRequestAirDrop(_ actionBar: ActionBarView)
     func actionBarDidRequestCopy(_ actionBar: ActionBarView)
     func actionBarDidRequestPaste(_ actionBar: ActionBarView)
     func actionBarDidRequestSave(_ actionBar: ActionBarView)
@@ -18,6 +19,7 @@ class ActionBarView: NSView {
     weak var delegate: ActionBarDelegate?
     
     private(set) var shareButton: NSButton!
+    private var airDropButton: NSButton!
     private var copyButton: NSButton!
     private var pasteButton: NSButton!
     private var saveButton: NSButton!
@@ -37,10 +39,13 @@ class ActionBarView: NSView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         
-        // Create compact icon-only buttons
         shareButton = createIconButton(icon: "square.and.arrow.up", 
                                        tooltip: "Share",
                                        action: #selector(shareAction))
+        
+        airDropButton = createIconButton(icon: "airplane",
+                                         tooltip: "AirDrop",
+                                         action: #selector(airDropAction))
         
         copyButton = createIconButton(icon: "doc.on.doc",
                                       tooltip: "Copy",
@@ -59,7 +64,7 @@ class ActionBarView: NSView {
                                         action: #selector(deleteAction))
         
         // Stack view for compact button layout
-        let stackView = NSStackView(views: [shareButton, copyButton, pasteButton, saveButton, deleteButton])
+        let stackView = NSStackView(views: [shareButton, airDropButton, copyButton, pasteButton, saveButton, deleteButton])
         stackView.orientation = .horizontal
         stackView.distribution = .fillEqually
         stackView.spacing = 4
@@ -97,6 +102,7 @@ class ActionBarView: NSView {
     
     func setEnabled(_ enabled: Bool) {
         shareButton.isEnabled = enabled
+        airDropButton.isEnabled = enabled
         copyButton.isEnabled = enabled
         saveButton.isEnabled = enabled
         deleteButton.isEnabled = enabled
@@ -108,6 +114,10 @@ class ActionBarView: NSView {
     
     @objc private func shareAction() {
         delegate?.actionBarDidRequestShare(self)
+    }
+    
+    @objc private func airDropAction() {
+        delegate?.actionBarDidRequestAirDrop(self)
     }
     
     @objc private func copyAction() {

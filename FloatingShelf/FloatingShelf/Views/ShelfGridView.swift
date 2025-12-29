@@ -80,6 +80,8 @@ class ShelfGridView: NSView {
         updateEmptyState()
     }
     
+    override var acceptsFirstResponder: Bool { true }
+    
     func reloadData(with items: [ShelfItem]) {
         self.items = items
         collectionView.reloadData()
@@ -107,7 +109,9 @@ class ShelfGridView: NSView {
     // MARK: - Key Events
     
     override func keyDown(with event: NSEvent) {
-        if event.keyCode == 51 { // Delete key
+        if event.keyCode == 49 { // Space bar = Quick Look
+            nextResponder?.keyDown(with: event)
+        } else if event.keyCode == 51 { // Delete key
             deleteSelectedItems()
         } else {
             super.keyDown(with: event)
