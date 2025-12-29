@@ -81,8 +81,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func createNewShelfWithFiles(_ urls: [URL]) {
         print("📝 Creating new shelf with \(urls.count) files...")
         
-        // Create new shelf with first file name
-        let position = CGPoint(x: 200, y: 400)
+        // Create new shelf in top-right corner
+        let screen = NSScreen.main ?? NSScreen.screens.first!
+        let shelfSize = CGSize(width: Constants.defaultShelfWidth, height: Constants.defaultShelfHeight)
+        let position = CGPoint(
+            x: screen.visibleFrame.maxX - shelfSize.width - 20,
+            y: screen.visibleFrame.maxY - shelfSize.height - 20
+        )
         var shelf = ItemStore.shared.createShelf(position: position)
         
         // Set shelf name to first file name (without extension)

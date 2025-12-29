@@ -8,6 +8,7 @@ import Cocoa
 protocol ActionBarDelegate: AnyObject {
     func actionBarDidRequestShare(_ actionBar: ActionBarView)
     func actionBarDidRequestCopy(_ actionBar: ActionBarView)
+    func actionBarDidRequestPaste(_ actionBar: ActionBarView)
     func actionBarDidRequestSave(_ actionBar: ActionBarView)
     func actionBarDidRequestDelete(_ actionBar: ActionBarView)
 }
@@ -18,6 +19,7 @@ class ActionBarView: NSView {
     
     private(set) var shareButton: NSButton!
     private var copyButton: NSButton!
+    private var pasteButton: NSButton!
     private var saveButton: NSButton!
     private var deleteButton: NSButton!
     
@@ -44,6 +46,10 @@ class ActionBarView: NSView {
                                       tooltip: "Copy",
                                       action: #selector(copyAction))
         
+        pasteButton = createIconButton(icon: "doc.on.clipboard",
+                                       tooltip: "Paste",
+                                       action: #selector(pasteAction))
+        
         saveButton = createIconButton(icon: "folder",
                                       tooltip: "Save to...",
                                       action: #selector(saveAction))
@@ -53,7 +59,7 @@ class ActionBarView: NSView {
                                         action: #selector(deleteAction))
         
         // Stack view for compact button layout
-        let stackView = NSStackView(views: [shareButton, copyButton, saveButton, deleteButton])
+        let stackView = NSStackView(views: [shareButton, copyButton, pasteButton, saveButton, deleteButton])
         stackView.orientation = .horizontal
         stackView.distribution = .fillEqually
         stackView.spacing = 4
@@ -94,6 +100,8 @@ class ActionBarView: NSView {
         copyButton.isEnabled = enabled
         saveButton.isEnabled = enabled
         deleteButton.isEnabled = enabled
+        // Paste is always enabled
+        pasteButton.isEnabled = true
     }
     
     // MARK: - Actions
@@ -104,6 +112,10 @@ class ActionBarView: NSView {
     
     @objc private func copyAction() {
         delegate?.actionBarDidRequestCopy(self)
+    }
+    
+    @objc private func pasteAction() {
+        delegate?.actionBarDidRequestPaste(self)
     }
     
     @objc private func saveAction() {

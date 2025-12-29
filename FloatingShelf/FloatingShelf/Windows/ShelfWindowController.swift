@@ -87,10 +87,10 @@ class ShelfWindowController: NSWindowController {
             return CGPoint(x: 100, y: 100)
         }
         
-        // Center of screen
+        // Top-right corner of screen
         let screenRect = screen.visibleFrame
-        let x = screenRect.midX - Constants.defaultShelfWidth / 2
-        let y = screenRect.midY - Constants.defaultShelfHeight / 2
+        let x = screenRect.maxX - Constants.defaultShelfWidth - 20
+        let y = screenRect.maxY - Constants.defaultShelfHeight - 20
         
         return CGPoint(x: x, y: y)
     }

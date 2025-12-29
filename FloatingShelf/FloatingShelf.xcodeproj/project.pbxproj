@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		F1000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000 /* AppDelegate.swift */; };
 		F10000A0 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000A1 /* MenuBarView.swift */; };
+		F10000B0 /* RecentShelvesPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000B1 /* RecentShelvesPopover.swift */; };
 		F1000002A /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000002B /* main.swift */; };
 		F1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1000002 /* Assets.xcassets */; };
 		F1000010 /* FloatingShelf.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F100000E /* FloatingShelf.xcdatamodeld */; };
@@ -18,8 +19,10 @@
 		F1000018 /* ItemStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000017 /* ItemStore.swift */; };
 		F100001A /* FileManager+Shelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000019 /* FileManager+Shelf.swift */; };
 		F100001C /* ThumbnailGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001B /* ThumbnailGenerator.swift */; };
+		F10000D0 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000D1 /* SettingsManager.swift */; };
 		F100001E /* ShelfWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001D /* ShelfWindowController.swift */; };
 		F1000020 /* ShelfWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001F /* ShelfWindow.swift */; };
+		F10000E0 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000E1 /* SettingsWindow.swift */; };
 		F1000022 /* ShelfViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000021 /* ShelfViewController.swift */; };
 		F1000024 /* ShelfItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000023 /* ShelfItemView.swift */; };
 		F1000026 /* ShelfGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000025 /* ShelfGridView.swift */; };
@@ -29,12 +32,14 @@
 		F100002E /* FilePromiseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100002D /* FilePromiseHandler.swift */; };
 		F1000030 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100002F /* HotkeyManager.swift */; };
 		F1000032 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000031 /* Constants.swift */; };
+		F10000C0 /* NSColor+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000C1 /* NSColor+Hex.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		9A046C562F0223C80092D6C2 /* FloatingShelf.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = FloatingShelf.xcodeproj; sourceTree = "<group>"; };
 		F1000000 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F10000A1 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		F10000B1 /* RecentShelvesPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentShelvesPopover.swift; sourceTree = "<group>"; };
 		F1000002B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F1000002 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F1000007 /* FloatingShelf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FloatingShelf.entitlements; sourceTree = "<group>"; };
@@ -45,8 +50,10 @@
 		F1000017 /* ItemStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemStore.swift; sourceTree = "<group>"; };
 		F1000019 /* FileManager+Shelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+Shelf.swift"; sourceTree = "<group>"; };
 		F100001B /* ThumbnailGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailGenerator.swift; sourceTree = "<group>"; };
+		F10000D1 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		F100001D /* ShelfWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfWindowController.swift; sourceTree = "<group>"; };
 		F100001F /* ShelfWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfWindow.swift; sourceTree = "<group>"; };
+		F10000E1 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
 		F1000021 /* ShelfViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfViewController.swift; sourceTree = "<group>"; };
 		F1000023 /* ShelfItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfItemView.swift; sourceTree = "<group>"; };
 		F1000025 /* ShelfGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfGridView.swift; sourceTree = "<group>"; };
@@ -56,6 +63,7 @@
 		F100002D /* FilePromiseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePromiseHandler.swift; sourceTree = "<group>"; };
 		F100002F /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		F1000031 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F10000C1 /* NSColor+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Hex.swift"; sourceTree = "<group>"; };
 		F10FFFFD /* FloatingShelf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FloatingShelf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -102,6 +110,7 @@
 				F1000017 /* ItemStore.swift */,
 				F1000019 /* FileManager+Shelf.swift */,
 				F100001B /* ThumbnailGenerator.swift */,
+				F10000D1 /* SettingsManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -111,6 +120,7 @@
 			children = (
 				F100001D /* ShelfWindowController.swift */,
 				F100001F /* ShelfWindow.swift */,
+				F10000E1 /* SettingsWindow.swift */,
 				F1000021 /* ShelfViewController.swift */,
 			);
 			path = Windows;
@@ -122,6 +132,7 @@
 				F1000023 /* ShelfItemView.swift */,
 				F1000025 /* ShelfGridView.swift */,
 				F1000027 /* ActionBarView.swift */,
+				F10000B1 /* RecentShelvesPopover.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -141,6 +152,7 @@
 			children = (
 				F100002F /* HotkeyManager.swift */,
 				F1000031 /* Constants.swift */,
+				F10000C1 /* NSColor+Hex.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -263,6 +275,7 @@
 			files = (
 				F1000001 /* AppDelegate.swift in Sources */,
 				F10000A0 /* MenuBarView.swift in Sources */,
+				F10000B0 /* RecentShelvesPopover.swift in Sources */,
 				F1000002A /* main.swift in Sources */,
 				F1000010 /* FloatingShelf.xcdatamodeld in Sources */,
 				F1000012 /* Shelf.swift in Sources */,
@@ -282,6 +295,9 @@
 				F100002E /* FilePromiseHandler.swift in Sources */,
 				F1000030 /* HotkeyManager.swift in Sources */,
 				F1000032 /* Constants.swift in Sources */,
+				F10000C0 /* NSColor+Hex.swift in Sources */,
+				F10000D0 /* SettingsManager.swift in Sources */,
+				F10000E0 /* SettingsWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

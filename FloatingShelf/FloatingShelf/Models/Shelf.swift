@@ -10,6 +10,7 @@ import CoreData
 struct Shelf {
     let id: UUID
     var name: String
+    var colorHex: String
     var createdAt: Date
     var isPinned: Bool
     var isCollapsed: Bool
@@ -19,6 +20,7 @@ struct Shelf {
     
     init(id: UUID = UUID(),
          name: String = "New Shelf",
+         colorHex: String = "#4A90D9",
          createdAt: Date = Date(),
          isPinned: Bool = false,
          isCollapsed: Bool = false,
@@ -27,6 +29,7 @@ struct Shelf {
          items: [ShelfItem] = []) {
         self.id = id
         self.name = name
+        self.colorHex = colorHex
         self.createdAt = createdAt
         self.isPinned = isPinned
         self.isCollapsed = isCollapsed
@@ -40,6 +43,7 @@ struct Shelf {
 class ShelfMO: NSManagedObject {
     @NSManaged var id: UUID
     @NSManaged var name: String
+    @NSManaged var colorHex: String
     @NSManaged var createdAt: Date
     @NSManaged var isPinned: Bool
     @NSManaged var isCollapsed: Bool
@@ -51,6 +55,7 @@ class ShelfMO: NSManagedObject {
         self.init(context: context)
         self.id = shelf.id
         self.name = shelf.name
+        self.colorHex = shelf.colorHex
         self.createdAt = shelf.createdAt
         self.isPinned = shelf.isPinned
         self.isCollapsed = shelf.isCollapsed
@@ -62,6 +67,7 @@ class ShelfMO: NSManagedObject {
         let itemsArray = (items as? Set<ShelfItemMO>)?.map { $0.toShelfItem() } ?? []
         return Shelf(id: id,
                     name: name,
+                    colorHex: colorHex,
                     createdAt: createdAt,
                     isPinned: isPinned,
                     isCollapsed: isCollapsed,

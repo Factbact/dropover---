@@ -14,6 +14,7 @@ class ShelfViewController: NSViewController {
     
     private var items: [ShelfItem] = []
     private var selectedItems: Set<UUID> = []
+    private var autoHideTimer: Timer?
     
     init(shelf: Shelf) {
         self.shelf = shelf
@@ -89,7 +90,10 @@ class ShelfViewController: NSViewController {
     private func createCustomTitleBar() -> NSView {
         let titleBar = NSView()
         titleBar.wantsLayer = true
-        titleBar.layer?.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(0.95).cgColor
+        
+        // Apply shelf color to title bar
+        let shelfColor = NSColor(hex: shelf.colorHex) ?? NSColor.systemBlue
+        titleBar.layer?.backgroundColor = shelfColor.withAlphaComponent(0.9).cgColor
         
         // Close button - macOS style red circle
         let closeButton = NSButton()
@@ -110,11 +114,24 @@ class ShelfViewController: NSViewController {
         xLabel.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addSubview(xLabel)
         
-        // Shelf name label (editable on double-click)
+        // Color picker button - using NSView with click gesture for better reliability
+        let colorButton = NSView()
+        colorButton.wantsLayer = true
+        colorButton.layer?.cornerRadius = 12
+        colorButton.layer?.backgroundColor = shelfColor.cgColor
+        colorButton.layer?.borderWidth = 2
+        colorButton.layer?.borderColor = NSColor.white.withAlphaComponent(0.6).cgColor
+        colorButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add click gesture recognizer
+        let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(showColorPicker))
+        colorButton.addGestureRecognizer(clickGesture)
+        
+        // Shelf name label (editable)
         let nameField = NSTextField()
         nameField.stringValue = shelf.name
-        nameField.font = NSFont.systemFont(ofSize: 12, weight: .medium)
-        nameField.textColor = NSColor.secondaryLabelColor
+        nameField.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        nameField.textColor = NSColor.white
         nameField.backgroundColor = .clear
         nameField.isBordered = false
         nameField.isEditable = true
@@ -124,11 +141,13 @@ class ShelfViewController: NSViewController {
         nameField.action = #selector(shelfNameChanged(_:))
         nameField.translatesAutoresizingMaskIntoConstraints = false
         
-        titleBar.addSubview(closeButton)
+        // Add subviews (order matters for z-index)
         titleBar.addSubview(nameField)
+        titleBar.addSubview(closeButton)
+        titleBar.addSubview(colorButton) // Last = on top
         
         NSLayoutConstraint.activate([
-            // Close button - larger and more visible
+            // Close button
             closeButton.leadingAnchor.constraint(equalTo: titleBar.leadingAnchor, constant: 10),
             closeButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
             closeButton.widthAnchor.constraint(equalToConstant: 28),
@@ -138,13 +157,106 @@ class ShelfViewController: NSViewController {
             xLabel.centerXAnchor.constraint(equalTo: closeButton.centerXAnchor),
             xLabel.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
             
-            // Name field - offset from close button to avoid overlap
+            // Color picker button (right side) - larger for easier clicking
+            colorButton.trailingAnchor.constraint(equalTo: titleBar.trailingAnchor, constant: -10),
+            colorButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
+            colorButton.widthAnchor.constraint(equalToConstant: 24),
+            colorButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            // Name field
             nameField.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 8),
-            nameField.trailingAnchor.constraint(equalTo: titleBar.trailingAnchor, constant: -8),
+            nameField.trailingAnchor.constraint(equalTo: colorButton.leadingAnchor, constant: -8),
             nameField.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor)
         ])
         
         return titleBar
+    }
+    
+    private var colorPopover: NSPopover?
+    
+    // Preset colors
+    private let presetColors: [String] = [
+        "#4A90D9", // Blue
+        "#5C6BC0", // Indigo
+        "#7E57C2", // Purple
+        "#EC407A", // Pink
+        "#EF5350", // Red
+        "#FF7043", // Orange
+        "#FFCA28", // Yellow
+        "#66BB6A", // Green
+        "#26A69A", // Teal
+        "#78909C"  // Gray
+    ]
+    
+    @objc private func showColorPicker() {
+        // Close existing popover
+        colorPopover?.close()
+        
+        // Create color palette view
+        let paletteView = NSView(frame: NSRect(x: 0, y: 0, width: 160, height: 80))
+        paletteView.wantsLayer = true
+        
+        // Create color buttons in 5x2 grid
+        for (index, colorHex) in presetColors.enumerated() {
+            let row = index / 5
+            let col = index % 5
+            
+            let colorButton = NSButton(frame: NSRect(
+                x: 8 + col * 30,
+                y: 42 - row * 30,
+                width: 26,
+                height: 26
+            ))
+            colorButton.bezelStyle = .regularSquare
+            colorButton.isBordered = false
+            colorButton.wantsLayer = true
+            colorButton.layer?.cornerRadius = 13
+            colorButton.layer?.backgroundColor = NSColor(hex: colorHex)?.cgColor
+            colorButton.tag = index
+            colorButton.target = self
+            colorButton.action = #selector(colorSelected(_:))
+            
+            // Add border for current color
+            if colorHex == shelf.colorHex {
+                colorButton.layer?.borderWidth = 2
+                colorButton.layer?.borderColor = NSColor.white.cgColor
+            }
+            
+            paletteView.addSubview(colorButton)
+        }
+        
+        // Create popover
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentSize = paletteView.bounds.size
+        
+        let viewController = NSViewController()
+        viewController.view = paletteView
+        popover.contentViewController = viewController
+        
+        // Show in top-right of screen
+        if let window = view.window {
+            let colorButtonFrame = NSRect(
+                x: window.frame.maxX - 30,
+                y: window.frame.maxY - 20,
+                width: 20,
+                height: 20
+            )
+            popover.show(relativeTo: colorButtonFrame, of: view, preferredEdge: .maxY)
+        }
+        
+        colorPopover = popover
+    }
+    
+    @objc private func colorSelected(_ sender: NSButton) {
+        let colorHex = presetColors[sender.tag]
+        shelf.colorHex = colorHex
+        ItemStore.shared.updateShelf(shelf)
+        colorPopover?.close()
+        
+        // Refresh view
+        view.subviews.forEach { $0.removeFromSuperview() }
+        setupUI()
     }
     
     @objc private func shelfNameChanged(_ sender: NSTextField) {
@@ -156,16 +268,81 @@ class ShelfViewController: NSViewController {
         view.window?.close()
     }
     
+    // MARK: - Clipboard Support
+    
+    @objc func paste(_ sender: Any?) {
+        pasteFromClipboard()
+    }
+    
+    private func pasteFromClipboard() {
+        let pasteboard = NSPasteboard.general
+        
+        do {
+            let newItems = try dropReceiver.processPasteboard(pasteboard)
+            
+            if newItems.isEmpty {
+                // No valid content in clipboard
+                return
+            }
+            
+            // Add items to store
+            for item in newItems {
+                ItemStore.shared.addItem(item, to: shelf.id)
+            }
+            
+            // Reload
+            items.append(contentsOf: newItems)
+            gridView.reloadData(with: items)
+            checkAutoHide()
+            
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = "Paste Failed"
+            alert.informativeText = error.localizedDescription
+            alert.alertStyle = .warning
+            alert.runModal()
+        }
+    }
+    
     // MARK: - Data
     
     private func loadItems() {
         items = ItemStore.shared.fetchItems(for: shelf.id)
         gridView.reloadData(with: items)
         updateActionBarState()
+        checkAutoHide()
     }
     
     private func updateActionBarState() {
         actionBar.setEnabled(!selectedItems.isEmpty)
+    }
+    
+    // MARK: - Auto-Hide
+    
+    private func checkAutoHide() {
+        // Cancel existing timer
+        autoHideTimer?.invalidate()
+        autoHideTimer = nil
+        
+        // Only start timer if auto-hide is enabled and shelf is empty
+        guard SettingsManager.shared.autoHideEnabled, items.isEmpty else { return }
+        
+        let delay = SettingsManager.shared.autoHideDelay
+        autoHideTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            self?.autoHideShelf()
+        }
+    }
+    
+    private func autoHideShelf() {
+        guard let window = view.window else { return }
+        
+        // Fade out animation
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.3
+            window.animator().alphaValue = 0
+        }, completionHandler: { [weak self] in
+            self?.closeWindow()
+        })
     }
 }
 
@@ -175,6 +352,7 @@ extension ShelfViewController: DropReceiverDelegate {
     func dropReceiver(_ receiver: DropReceiver, didReceiveItems newItems: [ShelfItem]) {
         items.append(contentsOf: newItems)
         gridView.reloadData(with: items)
+        checkAutoHide() // Cancel auto-hide if items were added
     }
     
     func dropReceiver(_ receiver: DropReceiver, didFailWithError error: Error) {
@@ -214,6 +392,10 @@ extension ShelfViewController: ActionBarDelegate {
     func actionBarDidRequestCopy(_ actionBar: ActionBarView) {
         let selectedItemsArray = items.filter { selectedItems.contains($0.id) }
         copyItems(selectedItemsArray)
+    }
+    
+    func actionBarDidRequestPaste(_ actionBar: ActionBarView) {
+        pasteFromClipboard()
     }
     
     func actionBarDidRequestSave(_ actionBar: ActionBarView) {

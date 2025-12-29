@@ -35,8 +35,15 @@ class MenuBarView: NSView {
             dirtyRect.fill()
         }
         
-        // Draw the tray icon
-        if let image = NSImage(systemSymbolName: "tray.fill", accessibilityDescription: "FloatingShelf") {
+        // Draw menu bar icon (custom or fallback to system)
+        let image: NSImage?
+        if let customIcon = NSImage(named: "MenuBarIcon") {
+            image = customIcon
+        } else {
+            image = NSImage(systemSymbolName: "tray.fill", accessibilityDescription: "FloatingShelf")
+        }
+        
+        if let image = image {
             image.isTemplate = true
             
             let imageSize = NSSize(width: 18, height: 18)
@@ -58,32 +65,23 @@ class MenuBarView: NSView {
         showMenu()
     }
     
+    private var popover: NSPopover?
+    
     private func showMenu() {
         let menu = NSMenu()
         menu.addItem(withTitle: "New Shelf", action: #selector(AppDelegate.createNewShelf), keyEquivalent: "n")
         menu.addItem(NSMenuItem.separator())
         
-        // Recent Shelves submenu
-        let recentItem = NSMenuItem(title: "Recent Shelves", action: nil, keyEquivalent: "")
-        let recentMenu = NSMenu()
-        
-        let shelves = ItemStore.shared.fetchAllShelves()
-        if shelves.isEmpty {
-            let emptyItem = NSMenuItem(title: "No recent shelves", action: nil, keyEquivalent: "")
-            emptyItem.isEnabled = false
-            recentMenu.addItem(emptyItem)
-        } else {
-            for (index, shelf) in shelves.prefix(5).enumerated() {
-                let shelfItem = NSMenuItem(title: shelf.name, action: #selector(openRecentShelf(_:)), keyEquivalent: "")
-                shelfItem.tag = index
-                shelfItem.target = self
-                shelfItem.representedObject = shelf.id
-                recentMenu.addItem(shelfItem)
-            }
-        }
-        
-        recentItem.submenu = recentMenu
+        // Recent Shelves - opens popover
+        let recentItem = NSMenuItem(title: "Recent Shelves...", action: #selector(showRecentShelvesPopover), keyEquivalent: "")
+        recentItem.target = self
         menu.addItem(recentItem)
+        menu.addItem(NSMenuItem.separator())
+        
+        // Settings
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(showSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
         
         menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: "Quit FloatingShelf", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -93,9 +91,26 @@ class MenuBarView: NSView {
         menu.popUp(positioning: nil, at: location, in: self)
     }
     
-    @objc private func openRecentShelf(_ sender: NSMenuItem) {
-        guard let shelfId = sender.representedObject as? UUID else { return }
-        appDelegate?.openShelf(shelfId)
+    @objc private func showRecentShelvesPopover() {
+        // Close existing popover
+        popover?.close()
+        
+        // Create popover
+        let newPopover = NSPopover()
+        newPopover.behavior = .transient
+        newPopover.contentSize = NSSize(width: 280, height: 300)
+        
+        let popoverVC = RecentShelvesPopover()
+        popoverVC.appDelegate = appDelegate
+        newPopover.contentViewController = popoverVC
+        
+        // Show below the menu bar view
+        newPopover.show(relativeTo: bounds, of: self, preferredEdge: .minY)
+        popover = newPopover
+    }
+    
+    @objc private func showSettings() {
+        SettingsWindowController.shared.show()
     }
     
     // MARK: - Drag and Drop

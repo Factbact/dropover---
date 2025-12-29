@@ -80,7 +80,10 @@ class DropReceiver: NSObject {
         return false
     }
     
-    private func processPasteboard(_ pasteboard: NSPasteboard) throws -> [ShelfItem] {
+    // MARK: - Pasteboard Processing
+    
+    /// Process pasteboard for clipboard paste support (public for ⌘+V)
+    func processPasteboard(_ pasteboard: NSPasteboard) throws -> [ShelfItem] {
         var items: [ShelfItem] = []
         
         // Priority 1: File URLs
