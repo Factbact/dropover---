@@ -13,6 +13,7 @@ protocol ActionBarDelegate: AnyObject {
     func actionBarDidRequestSave(_ actionBar: ActionBarView)
     func actionBarDidRequestDelete(_ actionBar: ActionBarView)
     func actionBarDidRequestZip(_ actionBar: ActionBarView)
+    func actionBarDidRequestSelectAll(_ actionBar: ActionBarView)
 }
 
 class ActionBarView: NSView {
@@ -26,6 +27,7 @@ class ActionBarView: NSView {
     private var saveButton: NSButton!
     private var deleteButton: NSButton!
     private var zipButton: NSButton!
+    private var selectAllButton: NSButton!
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -70,8 +72,12 @@ class ActionBarView: NSView {
                                      tooltip: "Create ZIP",
                                      action: #selector(zipAction))
         
+        selectAllButton = createIconButton(icon: "checkmark.circle",
+                                           tooltip: "Select All",
+                                           action: #selector(selectAllAction))
+        
         // Stack view for compact button layout
-        let stackView = NSStackView(views: [shareButton, airDropButton, copyButton, pasteButton, saveButton, zipButton, deleteButton])
+        let stackView = NSStackView(views: [selectAllButton, shareButton, airDropButton, copyButton, pasteButton, saveButton, zipButton, deleteButton])
         stackView.orientation = .horizontal
         stackView.distribution = .fillEqually
         stackView.spacing = 4
@@ -146,5 +152,9 @@ class ActionBarView: NSView {
     
     @objc private func zipAction() {
         delegate?.actionBarDidRequestZip(self)
+    }
+    
+    @objc private func selectAllAction() {
+        delegate?.actionBarDidRequestSelectAll(self)
     }
 }

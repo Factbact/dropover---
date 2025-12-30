@@ -12,11 +12,13 @@ class ShelfViewController: NSViewController {
     private var gridView: ShelfGridView!
     private var actionBar: ActionBarView!
     private var dropReceiver: DropReceiver!
-    private var nameField: NSTextField?  // Changed to optional to prevent crash
-    private var colorButton: NSButton?   // Promoted to property for popover positioning
+    private var nameField: NSTextField?
+    private var colorButton: NSButton?
+    private var expandButton: NSButton?  // For expand/collapse toggle
     
     private var items: [ShelfItem] = []
     private var selectedItems: Set<UUID> = []
+    private var isExpanded: Bool = false  // For expand/collapse view
 
     private var autoHideTimer: Timer?
     private var eventMonitor: Any?  // For monitoring Quick Look key events
@@ -63,12 +65,24 @@ class ShelfViewController: NSViewController {
     // MARK: - Event Handling
     
     override func keyDown(with event: NSEvent) {
+        // Cmd+A = Select All
+        if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "a" {
+            selectAllItems()
+            return
+        }
+        
         // Space bar = Quick Look
         if event.keyCode == 49 && !selectedItems.isEmpty {
             showQuickLook()
         } else {
             super.keyDown(with: event)
         }
+    }
+    
+    private func selectAllItems() {
+        selectedItems = Set(items.map { $0.id })
+        gridView.selectAll(selectedItems)
+        updateActionBarState()
     }
     
     override var acceptsFirstResponder: Bool { true }
@@ -157,21 +171,33 @@ class ShelfViewController: NSViewController {
     }
     
     override func mouseEntered(with event: NSEvent) {
+        // Show action bar
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
             actionBar.animator().alphaValue = 1
         }
+        
+        // Auto-expand if items exist
+        if !items.isEmpty && !isExpanded {
+            toggleExpand()
+        }
     }
     
     override func mouseExited(with event: NSEvent) {
+        // Hide action bar
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
             actionBar.animator().alphaValue = 0
         }
+        
+        // Auto-collapse
+        if isExpanded {
+            toggleExpand()
+        }
     }
     
     private func createCustomTitleBar() -> NSView {
-        let titleBar = NSView()
+        let titleBar = DraggableTitleView()
         titleBar.wantsLayer = true
         
         // Apply shelf color to title bar
@@ -200,62 +226,88 @@ class ShelfViewController: NSViewController {
         xLabel.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addSubview(xLabel)
         
-            // Color picker button - using standard NSButton for reliability
-            let colorButton = NSButton()
-            colorButton.bezelStyle = .regularSquare
-            colorButton.isBordered = false
-            colorButton.wantsLayer = true
-            colorButton.layer?.cornerRadius = 8
-            colorButton.layer?.backgroundColor = shelfColor.cgColor
-            colorButton.layer?.borderWidth = 1
-            colorButton.layer?.borderColor = NSColor.white.withAlphaComponent(0.6).cgColor
-            colorButton.target = self
-            colorButton.action = #selector(showColorPicker)
-            colorButton.translatesAutoresizingMaskIntoConstraints = false
-            self.colorButton = colorButton  // Store reference for showColorPicker
+        // Expand button - toggle expand/collapse view
+        let expandButton = NSButton()
+        expandButton.bezelStyle = .regularSquare
+        expandButton.isBordered = false
+        expandButton.wantsLayer = true
+        expandButton.title = "⌄"  // Chevron down for expand
+        expandButton.font = NSFont.systemFont(ofSize: 14, weight: .bold)
+        expandButton.contentTintColor = .white
+        expandButton.target = self
+        expandButton.action = #selector(toggleExpand)
+        expandButton.translatesAutoresizingMaskIntoConstraints = false
+        self.expandButton = expandButton
+        
+        // Color picker button - using standard NSButton for reliability
+        let colorButton = NSButton()
+        colorButton.bezelStyle = .regularSquare
+        colorButton.isBordered = false
+        colorButton.wantsLayer = true
+        colorButton.layer?.cornerRadius = 8
+        colorButton.layer?.backgroundColor = shelfColor.cgColor
+        colorButton.layer?.borderWidth = 1
+        colorButton.layer?.borderColor = NSColor.white.withAlphaComponent(0.6).cgColor
+        colorButton.target = self
+        colorButton.action = #selector(showColorPicker)
+        colorButton.translatesAutoresizingMaskIntoConstraints = false
+        self.colorButton = colorButton
+        
+        // Name field - not editable by default, double-click to edit
+        let field = NSTextField()
+        field.stringValue = shelf.name
+        field.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        field.textColor = NSColor.white
+        field.backgroundColor = .clear
+        field.isBordered = false
+        field.isEditable = false  // Disabled by default for dragging
+        field.isSelectable = false  // Prevent click from grabbing focus
+        field.focusRingType = .none
+        field.alignment = .center
+        field.target = self
+        field.action = #selector(shelfNameChanged(_:))
+        field.translatesAutoresizingMaskIntoConstraints = false
+        self.nameField = field
+        
+        // Double-click to edit name
+        let doubleClick = NSClickGestureRecognizer(target: self, action: #selector(enableNameEditing))
+        doubleClick.numberOfClicksRequired = 2
+        field.addGestureRecognizer(doubleClick)
+        
+        // Add subviews (order matters for z-index)
+        titleBar.addSubview(field)
+        titleBar.addSubview(closeButton)
+        titleBar.addSubview(expandButton)
+        titleBar.addSubview(colorButton) // Last = on top
+        
+        NSLayoutConstraint.activate([
+            // Close button
+            closeButton.leadingAnchor.constraint(equalTo: titleBar.leadingAnchor, constant: 10),
+            closeButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 24),
+            closeButton.heightAnchor.constraint(equalToConstant: 24),
+            
+            // X centered in button
+            xLabel.centerXAnchor.constraint(equalTo: closeButton.centerXAnchor),
+            xLabel.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
+            
+            // Expand button (after close button)
+            expandButton.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 4),
+            expandButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
+            expandButton.widthAnchor.constraint(equalToConstant: 20),
+            expandButton.heightAnchor.constraint(equalToConstant: 20),
+            
+            // Color picker button (right side)
+            colorButton.trailingAnchor.constraint(equalTo: titleBar.trailingAnchor, constant: -10),
+            colorButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
+            colorButton.widthAnchor.constraint(equalToConstant: 16),
+            colorButton.heightAnchor.constraint(equalToConstant: 16),
             
             // Name field
-            let field = NSTextField()
-            field.stringValue = shelf.name
-            field.font = NSFont.systemFont(ofSize: 11, weight: .medium)
-            field.textColor = NSColor.white
-            field.backgroundColor = .clear
-            field.isBordered = false
-            field.isEditable = true
-            field.focusRingType = .none
-            field.alignment = .center
-            field.target = self
-            field.action = #selector(shelfNameChanged(_:))
-            field.translatesAutoresizingMaskIntoConstraints = false
-            self.nameField = field
-            
-            // Add subviews (order matters for z-index)
-            titleBar.addSubview(field)
-            titleBar.addSubview(closeButton)
-            titleBar.addSubview(colorButton) // Last = on top
-            
-            NSLayoutConstraint.activate([
-                // Close button
-                closeButton.leadingAnchor.constraint(equalTo: titleBar.leadingAnchor, constant: 10),
-                closeButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
-                closeButton.widthAnchor.constraint(equalToConstant: 24),
-                closeButton.heightAnchor.constraint(equalToConstant: 24),
-                
-                // X centered in button
-                xLabel.centerXAnchor.constraint(equalTo: closeButton.centerXAnchor),
-                xLabel.centerYAnchor.constraint(equalTo: closeButton.centerYAnchor),
-                
-                // Color picker button (right side)
-                colorButton.trailingAnchor.constraint(equalTo: titleBar.trailingAnchor, constant: -10),
-                colorButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
-                colorButton.widthAnchor.constraint(equalToConstant: 16),
-                colorButton.heightAnchor.constraint(equalToConstant: 16),
-                
-                // Name field
-                field.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 8),
-                field.trailingAnchor.constraint(equalTo: colorButton.leadingAnchor, constant: -8),
-                field.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor)
-            ])
+            field.leadingAnchor.constraint(equalTo: expandButton.trailingAnchor, constant: 4),
+            field.trailingAnchor.constraint(equalTo: colorButton.leadingAnchor, constant: -8),
+            field.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor)
+        ])
         
         return titleBar
     }
@@ -335,11 +387,21 @@ class ShelfViewController: NSViewController {
         // Full rebuild for other effects
         view.subviews.forEach { $0.removeFromSuperview() }
         setupUI()
+        loadItems()  // Reload items after UI rebuild
     }
     
     @objc private func shelfNameChanged(_ sender: NSTextField) {
         shelf.name = sender.stringValue
         ItemStore.shared.updateShelf(shelf)
+        // Disable editing again after change
+        sender.isEditable = false
+        sender.isSelectable = false
+    }
+    
+    @objc private func enableNameEditing() {
+        nameField?.isEditable = true
+        nameField?.isSelectable = true
+        nameField?.becomeFirstResponder()
     }
     
     @objc private func closeWindow() {
@@ -438,7 +500,52 @@ class ShelfViewController: NSViewController {
         actionBar.setEnabled(!selectedItems.isEmpty)
     }
     
-    // MARK: - Auto-Hide
+    // MARK: - Expand/Collapse View
+    
+    @objc private func toggleExpand() {
+        isExpanded.toggle()
+        
+        guard let window = view.window else { return }
+        
+        let newHeight: CGFloat
+        if isExpanded {
+            newHeight = calculateExpandedHeight()
+        } else {
+            newHeight = Constants.defaultShelfHeight
+        }
+        
+        // Animate window resize
+        var newFrame = window.frame
+        let heightDiff = newHeight - newFrame.height
+        newFrame.size.height = newHeight
+        newFrame.origin.y -= heightDiff  // Keep top edge fixed
+        
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.2
+            window.animator().setFrame(newFrame, display: true)
+        }
+    }
+    
+    private func calculateExpandedHeight() -> CGFloat {
+        let itemCount = items.count
+        guard itemCount > 0 else { return Constants.defaultShelfHeight }
+        
+        // Grid: 74x110 items + 8px spacing + 8px inset
+        let itemsPerRow = 2  // 2 items per row in 200px width
+        let itemHeight: CGFloat = 110 + 8  // item + spacing
+        let rows = ceil(CGFloat(itemCount) / CGFloat(itemsPerRow))
+        
+        let titleBarHeight: CGFloat = 28
+        let actionBarHeight: CGFloat = 44
+        let topInset: CGFloat = 8
+        let bottomInset: CGFloat = 8
+        
+        let contentHeight = rows * itemHeight + topInset + bottomInset
+        let totalHeight = titleBarHeight + contentHeight + actionBarHeight
+        
+        // Cap at 600px max
+        return min(totalHeight, 600)
+    }
     
     private func checkAutoHide() {
         // Cancel existing timer
@@ -551,6 +658,10 @@ extension ShelfViewController: ActionBarDelegate {
     func actionBarDidRequestZip(_ actionBar: ActionBarView) {
         let selectedItemsArray = items.filter { selectedItems.contains($0.id) }
         zipItems(selectedItemsArray)
+    }
+    
+    func actionBarDidRequestSelectAll(_ actionBar: ActionBarView) {
+        selectAllItems()
     }
     
     // MARK: - ZIP Implementation
@@ -807,5 +918,28 @@ extension ShelfViewController: QLPreviewPanelDataSource, QLPreviewPanelDelegate 
         }
         
         return nil
+    }
+}
+
+// MARK: - Draggable Title View
+
+class DraggableTitleView: NSView {
+    
+    override var mouseDownCanMoveWindow: Bool {
+        return false
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        // Start tracking drag
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        guard let window = window else { return }
+        
+        // Use delta for smoother movement
+        var origin = window.frame.origin
+        origin.x += event.deltaX
+        origin.y -= event.deltaY  // Y is inverted in screen coordinates
+        window.setFrameOrigin(origin)
     }
 }

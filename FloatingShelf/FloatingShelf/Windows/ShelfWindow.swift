@@ -54,8 +54,10 @@ class ShelfWindow: NSPanel {
             contentView.layer?.backgroundColor = NSColor.clear.cgColor
         }
         
-        // Make movable by background
-        isMovableByWindowBackground = true
+        // Disable movable by background to allow rubber-band selection in collection view
+        // Window dragging will be handled manually in Title Bar
+        isMovableByWindowBackground = false
+        isMovable = true
         
         // Auto-save position
         setFrameAutosaveName("ShelfWindow_\(shelf.id.uuidString)")

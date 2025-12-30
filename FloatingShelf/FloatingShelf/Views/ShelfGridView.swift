@@ -45,12 +45,12 @@ class ShelfGridView: NSView {
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(emptyLabel)
         
-        // Collection view setup - compact thumbnails
+        // Collection view setup - balanced thumbnails with visible names
         let flowLayout = NSCollectionViewFlowLayout()
-        flowLayout.itemSize = NSSize(width: 80, height: 90)
-        flowLayout.minimumInteritemSpacing = 10
-        flowLayout.minimumLineSpacing = 10
-        flowLayout.sectionInset = NSEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        flowLayout.itemSize = NSSize(width: 74, height: 110)  // Taller for names, narrower for 2-col safety
+        flowLayout.minimumInteritemSpacing = 8
+        flowLayout.minimumLineSpacing = 8
+        flowLayout.sectionInset = NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
         
         collectionView.collectionViewLayout = flowLayout
         collectionView.dataSource = self
@@ -113,6 +113,13 @@ class ShelfGridView: NSView {
         registerForDraggedTypes(types)
         scrollView.registerForDraggedTypes(types)
         collectionView.registerForDraggedTypes(types)
+    }
+    
+    func selectAll(_ itemIds: Set<UUID>) {
+        selectedItems = itemIds
+        // Select all items in collection view
+        let allIndexPaths = Set((0..<items.count).map { IndexPath(item: $0, section: 0) })
+        collectionView.selectionIndexPaths = allIndexPaths
     }
     
     // MARK: - Dragging Destination
