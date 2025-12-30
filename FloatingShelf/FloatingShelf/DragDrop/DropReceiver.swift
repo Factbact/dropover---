@@ -198,11 +198,35 @@ class DropReceiver: NSObject {
     }
     
     private func processURL(_ url: URL) -> ShelfItem {
-        return ShelfItem(
-            displayName: url.absoluteString,
-            kind: .url,
-            fileSize: Int64(url.absoluteString.utf8.count)
-        )
+        // Create .webloc file for the URL
+        let urlId = UUID()
+        let hostName = url.host ?? "link"
+        let safeName = hostName.replacingOccurrences(of: "/", with: "_")
+        let weblocFilename = "\(safeName)_\(urlId.uuidString.prefix(8)).webloc"
+        
+        do {
+            let storageDir = try FileManager.default.shelfStorageDirectory()
+            let weblocURL = storageDir.appendingPathComponent(weblocFilename)
+            
+            // Create .webloc plist content
+            let plistContent: [String: Any] = ["URL": url.absoluteString]
+            let plistData = try PropertyListSerialization.data(fromPropertyList: plistContent, format: .xml, options: 0)
+            try plistData.write(to: weblocURL)
+            
+            return ShelfItem(
+                displayName: url.host ?? url.absoluteString,
+                kind: .url,
+                payloadPath: weblocFilename,
+                fileSize: Int64(plistData.count)
+            )
+        } catch {
+            // Fallback to in-memory URL
+            return ShelfItem(
+                displayName: url.absoluteString,
+                kind: .url,
+                fileSize: Int64(url.absoluteString.utf8.count)
+            )
+        }
     }
     
     private func processText(_ text: String) -> ShelfItem {

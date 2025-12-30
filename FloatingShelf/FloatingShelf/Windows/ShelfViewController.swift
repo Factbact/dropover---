@@ -548,7 +548,67 @@ extension ShelfViewController: ActionBarDelegate {
         gridView(gridView, didDeleteItems: selectedItems)
     }
     
-    // MARK: - Actions Implementation
+    func actionBarDidRequestZip(_ actionBar: ActionBarView) {
+        let selectedItemsArray = items.filter { selectedItems.contains($0.id) }
+        zipItems(selectedItemsArray)
+    }
+    
+    // MARK: - ZIP Implementation
+    
+    private func zipItems(_ items: [ShelfItem]) {
+        guard !items.isEmpty else { return }
+        
+        // Collect file URLs
+        var fileURLs: [URL] = []
+        let storageDir = try? FileManager.default.shelfStorageDirectory()
+        
+        for item in items {
+            if let path = item.payloadPath, let dir = storageDir {
+                let fileURL = dir.appendingPathComponent(path)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    fileURLs.append(fileURL)
+                }
+            }
+        }
+        
+        guard !fileURLs.isEmpty else { return }
+        
+        // Create ZIP file name
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+        let timestamp = dateFormatter.string(from: Date())
+        let zipName = "FloatingShelf_\(timestamp).zip"
+        
+        // Save to Downloads
+        let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let zipURL = downloadsURL.appendingPathComponent(zipName)
+        
+        // Create ZIP using shell command
+        let filePaths = fileURLs.map { $0.path }.joined(separator: "\" \"")
+        let command = "cd \"\(storageDir!.path)\" && zip -j \"\(zipURL.path)\" \"\(filePaths)\""
+        
+        let task = Process()
+        task.launchPath = "/bin/zsh"
+        task.arguments = ["-c", command]
+        
+        do {
+            try task.run()
+            task.waitUntilExit()
+            
+            if task.terminationStatus == 0 {
+                // Show success notification
+                let notification = NSUserNotification()
+                notification.title = "ZIP Created"
+                notification.informativeText = "Saved to Downloads: \(zipName)"
+                NSUserNotificationCenter.default.deliver(notification)
+                
+                // Reveal in Finder
+                NSWorkspace.shared.selectFile(zipURL.path, inFileViewerRootedAtPath: "")
+            }
+        } catch {
+            print("ZIP creation failed: \(error)")
+        }
+    }
     
     private func shareItems(_ items: [ShelfItem]) {
         var sharingItems: [Any] = []

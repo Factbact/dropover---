@@ -14,6 +14,9 @@ class SettingsManager {
     private enum Keys {
         static let autoHideEnabled = "autoHideEnabled"
         static let autoHideDelay = "autoHideDelay"
+        static let defaultShelfColor = "defaultShelfColor"
+        static let launchAtLogin = "launchAtLogin"
+        static let zipSaveLocation = "zipSaveLocation"
     }
     
     // MARK: - Auto-Hide Settings
@@ -33,11 +36,38 @@ class SettingsManager {
         set { defaults.set(newValue, forKey: Keys.autoHideDelay) }
     }
     
+    // MARK: - Appearance Settings
+    
+    /// Default shelf color hex (default: blue)
+    var defaultShelfColor: String {
+        get { defaults.string(forKey: Keys.defaultShelfColor) ?? "#4A90D9" }
+        set { defaults.set(newValue, forKey: Keys.defaultShelfColor) }
+    }
+    
+    // MARK: - Startup Settings
+    
+    /// Launch at login (default: false)
+    var launchAtLogin: Bool {
+        get { defaults.bool(forKey: Keys.launchAtLogin) }
+        set { defaults.set(newValue, forKey: Keys.launchAtLogin) }
+    }
+    
+    // MARK: - ZIP Settings
+    
+    /// ZIP save location: "downloads", "desktop", or "ask"
+    var zipSaveLocation: String {
+        get { defaults.string(forKey: Keys.zipSaveLocation) ?? "downloads" }
+        set { defaults.set(newValue, forKey: Keys.zipSaveLocation) }
+    }
+    
     private init() {
         // Register defaults
         defaults.register(defaults: [
             Keys.autoHideEnabled: false,
-            Keys.autoHideDelay: 5.0
+            Keys.autoHideDelay: 5.0,
+            Keys.defaultShelfColor: "#4A90D9",
+            Keys.launchAtLogin: false,
+            Keys.zipSaveLocation: "downloads"
         ])
     }
 }

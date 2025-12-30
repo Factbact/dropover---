@@ -15,7 +15,9 @@ A lightweight macOS utility for quick file management. Drag files to a floating 
 - 🎨 **Color Customization**: Choose from 10 preset colors for each shelf
 - 🪟 **Cascading Windows**: New shelves appear offset from existing ones
 - ✈️ **AirDrop Sharing**: One-click AirDrop for selected files
-- ⚙️ **Auto-hide Settings**: Configure auto-hide delay in Settings
+- 📦 **ZIP Compression**: Bundle selected files into a ZIP archive
+- 🔗 **URL Support**: Drag URLs from browser to save as bookmarks
+- ⚙️ **Settings**: Configure auto-hide, default color, ZIP save location
 
 ## Installation
 
@@ -35,6 +37,8 @@ A lightweight macOS utility for quick file management. Drag files to a floating 
 |--------|-----|
 | Create shelf | Click menu bar icon → New Shelf, or press `⌥⌘Space` |
 | Add files | Drag to menu bar icon or shelf window |
+| Add URL | Drag URL from browser to shelf |
+| Create ZIP | Select files → Click 📦 button |
 | Remove files | Select → Click 🗑️ |
 | Rename shelf | Click name in title bar |
 | Change color | Click color dot → Select from menu |
@@ -65,9 +69,11 @@ MIT License
 - ✏️ **自動命名**: 最初のファイル名でシェルフを命名
 - 🎯 **クイックアクション**: 共有、AirDrop、コピー、保存、削除をワンクリック
 - 💾 **永続ストレージ**: Core Dataでファイルを保存
-- 🎨 **Dropover風UI**: モダンな角丸、ミニマルなタイトルバー、ホバーアクションバー
+- 🎨 **カラーカスタマイズ**: 10種のプリセットカラーから選択
+- 📦 **ZIP圧縮**: 選択ファイルをZIPにまとめる
+- 🔗 **URL対応**: ブラウザからURLをドラッグして保存
 - ✈️ **AirDrop共有**: 選択ファイルをワンクリックでAirDrop
-- ⚙️ **自動非表示設定**: 設定で自動非表示の遅延時間を変更可能
+- ⚙️ **設定**: 自動非表示、デフォルトカラー、ZIP保存先を設定可能
 
 ## インストール
 

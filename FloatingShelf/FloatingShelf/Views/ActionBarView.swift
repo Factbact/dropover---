@@ -12,6 +12,7 @@ protocol ActionBarDelegate: AnyObject {
     func actionBarDidRequestPaste(_ actionBar: ActionBarView)
     func actionBarDidRequestSave(_ actionBar: ActionBarView)
     func actionBarDidRequestDelete(_ actionBar: ActionBarView)
+    func actionBarDidRequestZip(_ actionBar: ActionBarView)
 }
 
 class ActionBarView: NSView {
@@ -24,6 +25,7 @@ class ActionBarView: NSView {
     private var pasteButton: NSButton!
     private var saveButton: NSButton!
     private var deleteButton: NSButton!
+    private var zipButton: NSButton!
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -64,8 +66,12 @@ class ActionBarView: NSView {
                                         tooltip: "Delete",
                                         action: #selector(deleteAction))
         
+        zipButton = createIconButton(icon: "archivebox",
+                                     tooltip: "Create ZIP",
+                                     action: #selector(zipAction))
+        
         // Stack view for compact button layout
-        let stackView = NSStackView(views: [shareButton, airDropButton, copyButton, pasteButton, saveButton, deleteButton])
+        let stackView = NSStackView(views: [shareButton, airDropButton, copyButton, pasteButton, saveButton, zipButton, deleteButton])
         stackView.orientation = .horizontal
         stackView.distribution = .fillEqually
         stackView.spacing = 4
@@ -107,6 +113,7 @@ class ActionBarView: NSView {
         copyButton.isEnabled = enabled
         saveButton.isEnabled = enabled
         deleteButton.isEnabled = enabled
+        zipButton.isEnabled = enabled
         // Paste is always enabled
         pasteButton.isEnabled = true
     }
@@ -135,5 +142,9 @@ class ActionBarView: NSView {
     
     @objc private func deleteAction() {
         delegate?.actionBarDidRequestDelete(self)
+    }
+    
+    @objc private func zipAction() {
+        delegate?.actionBarDidRequestZip(self)
     }
 }
