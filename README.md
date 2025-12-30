@@ -10,8 +10,11 @@ A lightweight macOS utility for quick file management. Drag files to a floating 
 - 📁 **Drag & Drop**: Drop files onto menu bar icon or shelf window
 - 📋 **Recent Shelves**: Quick access to last 5 shelves
 - ✏️ **Auto-naming**: Shelf named after first file
-- 🎯 **Quick Actions**: Share, Copy, Save, Delete with one click
+- 🎯 **Quick Actions**: Share, AirDrop, Copy, Save, Delete with one click
 - 💾 **Persistent Storage**: Files saved via Core Data
+- 🎨 **Dropover-style UI**: Modern rounded corners, minimal title bar, hover action bar
+- ✈️ **AirDrop Sharing**: One-click AirDrop for selected files
+- ⚙️ **Auto-hide Settings**: Configure auto-hide delay in Settings
 
 ## Installation
 
@@ -58,8 +61,11 @@ MIT License
 - 📁 **ドラッグ＆ドロップ**: メニューバーアイコンまたはシェルフウィンドウにドロップ
 - 📋 **最近のシェルフ**: 過去5つのシェルフにクイックアクセス
 - ✏️ **自動命名**: 最初のファイル名でシェルフを命名
-- 🎯 **クイックアクション**: 共有、コピー、保存、削除をワンクリック
+- 🎯 **クイックアクション**: 共有、AirDrop、コピー、保存、削除をワンクリック
 - 💾 **永続ストレージ**: Core Dataでファイルを保存
+- 🎨 **Dropover風UI**: モダンな角丸、ミニマルなタイトルバー、ホバーアクションバー
+- ✈️ **AirDrop共有**: 選択ファイルをワンクリックでAirDrop
+- ⚙️ **自動非表示設定**: 設定で自動非表示の遅延時間を変更可能
 
 ## インストール
 

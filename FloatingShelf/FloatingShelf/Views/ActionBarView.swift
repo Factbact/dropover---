@@ -37,7 +37,8 @@ class ActionBarView: NSView {
     
     private func setupUI() {
         wantsLayer = true
-        layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        layer?.cornerRadius = 10
         
         shareButton = createIconButton(icon: "square.and.arrow.up", 
                                        tooltip: "Share",

@@ -48,7 +48,7 @@ class ShelfWindow: NSPanel {
         // Apply rounded corners to content view
         if let contentView = contentView {
             contentView.wantsLayer = true
-            contentView.layer?.cornerRadius = 16
+            contentView.layer?.cornerRadius = 20
             contentView.layer?.cornerCurve = .continuous
             contentView.layer?.masksToBounds = true
             contentView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor

@@ -69,10 +69,11 @@ class ShelfViewController: NSViewController {
         gridView.delegate = self
         view.addSubview(gridView)
         
-        // Action bar at bottom
+        // Action bar at bottom (hidden by default, shows on hover)
         actionBar = ActionBarView()
         actionBar.translatesAutoresizingMaskIntoConstraints = false
         actionBar.delegate = self
+        actionBar.alphaValue = 0  // Hidden initially
         view.addSubview(actionBar)
         
         // Custom title bar for borderless window (add LAST to be on top)
@@ -86,19 +87,47 @@ class ShelfViewController: NSViewController {
             titleBar.topAnchor.constraint(equalTo: view.topAnchor),
             titleBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             titleBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            titleBar.heightAnchor.constraint(equalToConstant: 40),
+            titleBar.heightAnchor.constraint(equalToConstant: 28),
             
-            // Grid view
+            // Grid view fills to bottom (action bar overlays)
             gridView.topAnchor.constraint(equalTo: titleBar.bottomAnchor),
             gridView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             gridView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            gridView.bottomAnchor.constraint(equalTo: actionBar.topAnchor),
+            gridView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            actionBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            actionBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            actionBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            actionBar.heightAnchor.constraint(equalToConstant: 32)
+            // Action bar overlays bottom
+            actionBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            actionBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            actionBar.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -8),
+            actionBar.heightAnchor.constraint(equalToConstant: 36)
         ])
+        
+        // Set up hover tracking
+        setupHoverTracking()
+    }
+    
+    private func setupHoverTracking() {
+        let trackingArea = NSTrackingArea(
+            rect: .zero,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        view.addTrackingArea(trackingArea)
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.2
+            actionBar.animator().alphaValue = 1
+        }
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.2
+            actionBar.animator().alphaValue = 0
+        }
     }
     
     private func createCustomTitleBar() -> NSView {
@@ -114,16 +143,15 @@ class ShelfViewController: NSViewController {
         closeButton.bezelStyle = .regularSquare
         closeButton.isBordered = false
         closeButton.wantsLayer = true
-        closeButton.layer?.cornerRadius = 14
-        closeButton.layer?.backgroundColor = NSColor.systemRed.cgColor
+        closeButton.layer?.cornerRadius = 12
+        closeButton.layer?.backgroundColor = NSColor.systemRed.withAlphaComponent(0.9).cgColor
         closeButton.title = ""
         closeButton.target = self
         closeButton.action = #selector(closeWindow)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add X symbol inside
         let xLabel = NSTextField(labelWithString: "✕")
-        xLabel.font = NSFont.systemFont(ofSize: 16, weight: .bold)
+        xLabel.font = NSFont.systemFont(ofSize: 14, weight: .bold)
         xLabel.textColor = NSColor.white
         xLabel.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addSubview(xLabel)
@@ -131,9 +159,9 @@ class ShelfViewController: NSViewController {
         // Color picker button - using NSView with click gesture for better reliability
         let colorButton = NSView()
         colorButton.wantsLayer = true
-        colorButton.layer?.cornerRadius = 12
+        colorButton.layer?.cornerRadius = 4
         colorButton.layer?.backgroundColor = shelfColor.cgColor
-        colorButton.layer?.borderWidth = 2
+        colorButton.layer?.borderWidth = 1
         colorButton.layer?.borderColor = NSColor.white.withAlphaComponent(0.6).cgColor
         colorButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -144,7 +172,7 @@ class ShelfViewController: NSViewController {
         // Shelf name label (editable)
         let nameField = NSTextField()
         nameField.stringValue = shelf.name
-        nameField.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        nameField.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         nameField.textColor = NSColor.white
         nameField.backgroundColor = .clear
         nameField.isBordered = false
@@ -164,8 +192,8 @@ class ShelfViewController: NSViewController {
             // Close button
             closeButton.leadingAnchor.constraint(equalTo: titleBar.leadingAnchor, constant: 10),
             closeButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
-            closeButton.widthAnchor.constraint(equalToConstant: 28),
-            closeButton.heightAnchor.constraint(equalToConstant: 28),
+            closeButton.widthAnchor.constraint(equalToConstant: 24),
+            closeButton.heightAnchor.constraint(equalToConstant: 24),
             
             // X centered in button
             xLabel.centerXAnchor.constraint(equalTo: closeButton.centerXAnchor),
@@ -174,8 +202,8 @@ class ShelfViewController: NSViewController {
             // Color picker button (right side) - larger for easier clicking
             colorButton.trailingAnchor.constraint(equalTo: titleBar.trailingAnchor, constant: -10),
             colorButton.centerYAnchor.constraint(equalTo: titleBar.centerYAnchor),
-            colorButton.widthAnchor.constraint(equalToConstant: 24),
-            colorButton.heightAnchor.constraint(equalToConstant: 24),
+            colorButton.widthAnchor.constraint(equalToConstant: 16),
+            colorButton.heightAnchor.constraint(equalToConstant: 16),
             
             // Name field
             nameField.leadingAnchor.constraint(equalTo: closeButton.trailingAnchor, constant: 8),

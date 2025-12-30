@@ -42,12 +42,12 @@ class ShelfGridView: NSView {
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(emptyLabel)
         
-        // Collection view setup
+        // Collection view setup - compact thumbnails
         let flowLayout = NSCollectionViewFlowLayout()
-        flowLayout.itemSize = NSSize(width: 100, height: 120)
-        flowLayout.minimumInteritemSpacing = 16
-        flowLayout.minimumLineSpacing = 16
-        flowLayout.sectionInset = NSEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
+        flowLayout.itemSize = NSSize(width: 80, height: 90)
+        flowLayout.minimumInteritemSpacing = 10
+        flowLayout.minimumLineSpacing = 10
+        flowLayout.sectionInset = NSEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         
         collectionView.collectionViewLayout = flowLayout
         collectionView.dataSource = self
