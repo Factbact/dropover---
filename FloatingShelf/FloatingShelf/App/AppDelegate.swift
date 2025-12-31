@@ -14,6 +14,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("🚀 FloatingShelf アプリケーション起動開始")
         
+        // Set up main menu for keyboard shortcuts
+        setupMainMenu()
+        
         // Set up menu bar icon
         print("📍 メニューバーのセットアップ開始...")
         setupMenuBar()
@@ -45,6 +48,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
+    }
+    
+    // MARK: - Main Menu (for keyboard shortcuts like Cmd+W)
+    
+    private func setupMainMenu() {
+        let mainMenu = NSMenu()
+        
+        // Application menu
+        let appMenuItem = NSMenuItem()
+        let appMenu = NSMenu(title: "FloatingShelf")
+        appMenu.addItem(withTitle: "About FloatingShelf", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(withTitle: L(.settings) + "...", action: #selector(openSettings), keyEquivalent: ",")
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(withTitle: L(.quit), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenuItem.submenu = appMenu
+        mainMenu.addItem(appMenuItem)
+        
+        // File menu (for Cmd+W)
+        let fileMenuItem = NSMenuItem()
+        let fileMenu = NSMenu(title: "File")
+        fileMenu.addItem(withTitle: L(.newShelf), action: #selector(createNewShelf), keyEquivalent: "n")
+        fileMenu.addItem(NSMenuItem.separator())
+        let closeItem = NSMenuItem(title: "Close Window", action: #selector(closeKeyWindow), keyEquivalent: "w")
+        closeItem.target = self
+        fileMenu.addItem(closeItem)
+        fileMenuItem.submenu = fileMenu
+        mainMenu.addItem(fileMenuItem)
+        
+        // Edit menu (for standard clipboard shortcuts)
+        let editMenuItem = NSMenuItem()
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenuItem.submenu = editMenu
+        mainMenu.addItem(editMenuItem)
+        
+        NSApp.mainMenu = mainMenu
+    }
+    
+    @objc private func closeKeyWindow() {
+        NSApp.keyWindow?.close()
+    }
+    
+    @objc private func openSettings() {
+        SettingsWindowController.shared.show()
     }
     
     // MARK: - Menu Bar

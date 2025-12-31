@@ -7,6 +7,12 @@ FloatingShelf is a lightweight, menu bar utility that transforms how you manage 
 **🚀 Designed to start fast and stay out of your way.**  
 FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just efficiency.
 
+<!-- 
+## Demo
+
+![FloatingShelf Demo](assets/demo.gif)
+-->
+
 ---
 
 ## Why FloatingShelf?
@@ -14,7 +20,7 @@ FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just
 - **🖱 Frictionless Drag & Drop**: Drag files to the shelf, switch apps, and drop them where they need to go. No more awkward window juggling.
 - **🧹 Keep Your Desktop Clean**: Stop using your Desktop as a temporary dumping ground. Use a shelf instead.
 - **👻 Unobtrusive Design**: The window floats on top when you need it and tucks away when you don't. It's a menu bar app, so it won't clutter your Dock.
-- **⚡️ Power User Friendly**: Control everything with keyboard shortcuts. `⌘A` to select all, `Space` to preview, `⌫` to delete.
+- **⚡️ Power User Friendly**: Control everything with keyboard shortcuts. `⌘W` to close, `⌘N` for new shelf, `Space` to preview.
 
 ---
 
@@ -34,7 +40,20 @@ FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just
 ### 🎨 Customizable
 - **Color Coding**: Assign colors to shelves to organize by project or priority.
 - **Action Bar**: Toggle buttons in Settings to show only the tools you use.
+- **Language**: Choose between English and 日本語.
 - **Launch at Login**: Ready to go the moment you start your day.
+
+### ⌨️ Keyboard Shortcuts
+| Shortcut | Action |
+|:---|:---|
+| `⌘N` | New Shelf |
+| `⌘W` | Close Window |
+| `⌘,` | Open Settings |
+| `⌘Q` | Quit |
+| `⌘A` | Select All |
+| `Space` | Quick Look |
+| `⌫` | Delete Selected |
+| `↵` | Open Selected |
 
 ---
 
@@ -62,14 +81,14 @@ FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just
 
 | Goal | Action |
 |:---|:---|
-| **Create a Shelf** | Click the menu bar icon ☁️ → "New Shelf" (or hotkey `⌥⌘Space`) |
+| **Create a Shelf** | Click the menu bar icon ☁️ → "New Shelf" (or `⌥⌘Space`) |
 | **Add Files** | Drag files onto the shelf window or the menu bar icon |
 | **Move Files Out** | Drag files from the shelf to any other app (Finder, Mail, Slack, etc.) |
 | **Preview** | Select a file and press `Space` |
 | **Action** | Use the buttons at the bottom for Actions like ZIP, Copy, or Delete |
-| **Close** | Click the red ✕ button (Files remain until you delete them!) |
+| **Close** | `⌘W` or click the red ✕ button |
 
-> **💡 Note**: FloatingShelf is a "Menu Bar App". It does not appear in your Dock properly. Access preferences and new shelves from the ☁️ icon in your top menu bar.
+> **💡 Note**: FloatingShelf is a "Menu Bar App". It does not appear in your Dock. Access preferences and new shelves from the ☁️ icon in your top menu bar.
 
 ---
 
@@ -77,6 +96,25 @@ FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just
 
 - macOS 12.0 (Monterey) or later
 - Apple Silicon or Intel Mac
+
+---
+
+## Changelog
+
+### v1.9.0 (2024-12-31)
+- 🌐 **Language Selection**: English / 日本語 in Settings
+- ⌨️ **Keyboard Shortcuts**: Cmd+W (close), Cmd+N (new), Cmd+, (settings), Cmd+Q (quit)
+- 🐛 **Fixed Settings Window**: Settings now displays correctly
+
+### v1.8.0 (2024-12-31)
+- 🐛 **Bug Fix**: Fixed drag & drop bug
+- ✨ **Customizable Action Bar**, Sort, Launch at Login
+
+---
+
+## License
+
+MIT License
 
 ---
 
@@ -96,7 +134,7 @@ Dockを占有することなく、必要な時だけサッと使えます。
 - **🖱 ドラッグ＆ドロップが快適に**: ファイルを持って、アプリを切り替えて、ドロップ。ウィンドウを並べて無理やりドラッグする必要はもうありません。
 - **🧹 デスクトップをきれいに**: 「とりあえずデスクトップに保存」はやめましょう。シェルフに置けば、デスクトップは常に整理整頓されたまま。
 - **👻 邪魔にならないデザイン**: メニューバー常駐アプリなのでDockに表示されず、作業スペースを圧迫しません。
-- **⚡️ パワーユーザー機能**: キーボードショートカットに完全対応。`⌘A`で全選択、`Space`でプレビュー、`⌫`で削除。
+- **⚡️ パワーユーザー機能**: キーボードショートカットに完全対応。`⌘W`で閉じる、`⌘N`で新規、`Space`でプレビュー。
 
 ---
 
@@ -116,7 +154,20 @@ Dockを占有することなく、必要な時だけサッと使えます。
 ### 🎨 自分好みにカスタマイズ
 - **カラータグ**: プロジェクトや優先度に合わせてシェルフの色を変更可能（10色）。
 - **アクションバー設定**: 頻繁に使うボタンだけを表示するように設定できます。
+- **言語設定**: English / 日本語 を切り替え可能。
 - **ログイン時起動**: Macを起動したらすぐに使い始められます。
+
+### ⌨️ キーボードショートカット
+| ショートカット | 操作 |
+|:---|:---|
+| `⌘N` | 新規シェルフ |
+| `⌘W` | ウィンドウを閉じる |
+| `⌘,` | 設定を開く |
+| `⌘Q` | 終了 |
+| `⌘A` | 全選択 |
+| `Space` | クイックルック |
+| `⌫` | 削除 |
+| `↵` | 開く |
 
 ---
 
@@ -149,7 +200,7 @@ Dockを占有することなく、必要な時だけサッと使えます。
 | **取り出す** | シェルフからFinder、メール、Slackなどへドラッグ |
 | **プレビュー** | ファイルを選択して `Space` キー |
 | **アクション** | 下部のボタンを使って、ZIP圧縮や削除などの操作が可能 |
-| **閉じる** | 赤い ✕ ボタンをクリック（ファイルは削除されず残ります） |
+| **閉じる** | `⌘W` または赤い ✕ ボタンをクリック |
 
 > **💡 ヒント**: FloatingShelfは「メニューバー常駐アプリ」です。起動してもDockにはアイコンが表示されません。設定や新規作成は、画面右上のメニューバーにある ☁️ アイコンから行います。
 
@@ -159,6 +210,19 @@ Dockを占有することなく、必要な時だけサッと使えます。
 
 - macOS 12.0 (Monterey) 以降
 - Apple Silicon または Intel Mac
+
+---
+
+## 更新履歴
+
+### v1.9.0 (2024-12-31)
+- 🌐 **言語選択**: 設定でEnglish / 日本語を切り替え可能
+- ⌨️ **キーボードショートカット**: Cmd+W/N/,/Q に対応
+- 🐛 **設定ウィンドウ修正**: 正常に表示されるように
+
+### v1.8.0 (2024-12-31)
+- 🐛 **バグ修正**: ドラッグ＆ドロップの不具合を修正
+- ✨ **アクションバーカスタマイズ**、並べ替え、ログイン時起動
 
 ---
 
