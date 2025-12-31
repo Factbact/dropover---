@@ -7,11 +7,10 @@ FloatingShelf is a lightweight, menu bar utility that transforms how you manage 
 **🚀 Designed to start fast and stay out of your way.**  
 FloatingShelf lives in your menu bar and keeps your Dock clean. No clutter, just efficiency.
 
-<!-- 
 ## Demo
 
-![FloatingShelf Demo](assets/demo.gif)
--->
+![FloatingShelf Demo](floatshelf.gif)
+
 
 ---
 
