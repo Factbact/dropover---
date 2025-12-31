@@ -19,7 +19,8 @@
 		F1000018 /* ItemStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000017 /* ItemStore.swift */; };
 		F100001A /* FileManager+Shelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000019 /* FileManager+Shelf.swift */; };
 		F100001C /* ThumbnailGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001B /* ThumbnailGenerator.swift */; };
-		F10000D0 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000D1 /* SettingsManager.swift */; };
+		F10000D3 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000D2 /* LocalizationManager.swift */; };
+                F10000D0 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000D1 /* SettingsManager.swift */; };
 		F100001E /* ShelfWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001D /* ShelfWindowController.swift */; };
 		F1000020 /* ShelfWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F100001F /* ShelfWindow.swift */; };
 		F10000E0 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000E1 /* SettingsWindow.swift */; };
@@ -50,7 +51,8 @@
 		F1000017 /* ItemStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemStore.swift; sourceTree = "<group>"; };
 		F1000019 /* FileManager+Shelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+Shelf.swift"; sourceTree = "<group>"; };
 		F100001B /* ThumbnailGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailGenerator.swift; sourceTree = "<group>"; };
-		F10000D1 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		F10000D2 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
+                F10000D1 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		F100001D /* ShelfWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfWindowController.swift; sourceTree = "<group>"; };
 		F100001F /* ShelfWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelfWindow.swift; sourceTree = "<group>"; };
 		F10000E1 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
@@ -110,7 +112,8 @@
 				F1000017 /* ItemStore.swift */,
 				F1000019 /* FileManager+Shelf.swift */,
 				F100001B /* ThumbnailGenerator.swift */,
-				F10000D1 /* SettingsManager.swift */,
+				F10000D2 /* LocalizationManager.swift */,
+                                F10000D1 /* SettingsManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -296,7 +299,8 @@
 				F1000030 /* HotkeyManager.swift in Sources */,
 				F1000032 /* Constants.swift in Sources */,
 				F10000C0 /* NSColor+Hex.swift in Sources */,
-				F10000D0 /* SettingsManager.swift in Sources */,
+				F10000D3 /* LocalizationManager.swift in Sources */,
+                                F10000D0 /* SettingsManager.swift in Sources */,
 				F10000E0 /* SettingsWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -54,7 +54,7 @@ class SettingsManager {
     /// Check if login item is currently enabled
     var isLaunchAtLoginEnabled: Bool {
         if #available(macOS 13.0, *) {
-            return SMAppService.mainApp.status == .enabled
+            print("Checking SMAppService status..."); let status = SMAppService.mainApp.status; print("SMAppService status: \(status)"); return status == .enabled
         } else {
             return defaults.bool(forKey: Keys.launchAtLogin)
         }

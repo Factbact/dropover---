@@ -12,13 +12,14 @@ class SettingsWindowController: NSWindowController {
     
     private init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 400, height: 520),
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 560),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
         )
-        window.title = "設定"
+        window.title = L(.settings)
         window.center()
+        window.isReleasedWhenClosed = false
         
         super.init(window: window)
         
@@ -29,212 +30,154 @@ class SettingsWindowController: NSWindowController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func rebuildUI() {
+        window?.contentView?.subviews.forEach { $0.removeFromSuperview() }
+        buttonCheckboxes.removeAll()
+        window?.title = L(.settings)
+        setupUI()
+    }
+    
     private func setupUI() {
         guard let contentView = window?.contentView else { return }
         contentView.wantsLayer = true
-        contentView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         
-        // Scroll view for content
-        let scrollView = NSScrollView()
+        // ScrollView
+        let scrollView = NSScrollView(frame: contentView.bounds)
+        scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.drawsBackground = false
         contentView.addSubview(scrollView)
         
-        let documentView = NSView()
-        documentView.translatesAutoresizingMaskIntoConstraints = false
+        // Document view (flipped for top-to-bottom layout)
+        let documentView = FlippedView(frame: NSRect(x: 0, y: 0, width: 400, height: 600))
         scrollView.documentView = documentView
         
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-        ])
+        var yPos: CGFloat = 15
         
-        var yOffset: CGFloat = 20
+        // === Language Section ===
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.language), height: 50) { container in
+            let langPopup = NSPopUpButton(frame: NSRect(x: 15, y: 12, width: 200, height: 25), pullsDown: false)
+            for lang in AppLanguage.allCases {
+                langPopup.addItem(withTitle: lang.displayName)
+            }
+            if let index = AppLanguage.allCases.firstIndex(of: LocalizationManager.shared.currentLanguage) {
+                langPopup.selectItem(at: index)
+            }
+            langPopup.target = self
+            langPopup.action = #selector(self.languageChanged(_:))
+            container.addSubview(langPopup)
+        }
         
         // === Auto-Hide Section ===
-        yOffset = addSectionCard(to: documentView, at: yOffset, title: "自動非表示", content: { cardView in
-            var innerY: CGFloat = 10
-            
-            let checkbox = NSButton(checkboxWithTitle: "空のシェルフを自動非表示", target: self, action: #selector(toggleAutoHide(_:)))
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.behavior), height: 70) { container in
+            let checkbox = NSButton(checkboxWithTitle: L(.autoHideWhenEmpty), target: self, action: #selector(self.toggleAutoHide(_:)))
             checkbox.state = SettingsManager.shared.autoHideEnabled ? .on : .off
-            checkbox.translatesAutoresizingMaskIntoConstraints = false
-            cardView.addSubview(checkbox)
-            NSLayoutConstraint.activate([
-                checkbox.topAnchor.constraint(equalTo: cardView.topAnchor, constant: innerY),
-                checkbox.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 15)
-            ])
-            innerY += 30
+            checkbox.frame = NSRect(x: 15, y: 35, width: 300, height: 20)
+            container.addSubview(checkbox)
             
-            let delayStack = NSStackView()
-            delayStack.orientation = .horizontal
-            delayStack.spacing = 8
-            delayStack.translatesAutoresizingMaskIntoConstraints = false
+            let delayLabel = NSTextField(labelWithString: L(.delay))
+            delayLabel.frame = NSRect(x: 15, y: 8, width: 50, height: 20)
+            container.addSubview(delayLabel)
             
-            let delayLabel = NSTextField(labelWithString: "閉じるまで:")
             let delayField = NSTextField()
             delayField.stringValue = String(Int(SettingsManager.shared.autoHideDelay))
-            delayField.isEditable = true
+            delayField.frame = NSRect(x: 65, y: 8, width: 40, height: 20)
             delayField.target = self
-            delayField.action = #selector(delayChanged(_:))
-            delayField.widthAnchor.constraint(equalToConstant: 40).isActive = true
-            let secondsLabel = NSTextField(labelWithString: "秒")
+            delayField.action = #selector(self.delayChanged(_:))
+            container.addSubview(delayField)
             
-            delayStack.addArrangedSubview(delayLabel)
-            delayStack.addArrangedSubview(delayField)
-            delayStack.addArrangedSubview(secondsLabel)
-            cardView.addSubview(delayStack)
-            NSLayoutConstraint.activate([
-                delayStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: innerY),
-                delayStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 15)
-            ])
-            
-            return 70
-        })
+            let secLabel = NSTextField(labelWithString: L(.seconds))
+            secLabel.frame = NSRect(x: 110, y: 8, width: 30, height: 20)
+            container.addSubview(secLabel)
+        }
         
-        // === Appearance Section ===
-        yOffset = addSectionCard(to: documentView, at: yOffset, title: "外観", content: { cardView in
-            let colorStack = NSStackView()
-            colorStack.orientation = .horizontal
-            colorStack.spacing = 8
-            colorStack.translatesAutoresizingMaskIntoConstraints = false
-            
-            let colorLabel = NSTextField(labelWithString: "デフォルトカラー:")
-            let colorPopup = NSPopUpButton()
+        // === Color Section ===
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.defaultColor), height: 50) { container in
+            let colorPopup = NSPopUpButton(frame: NSRect(x: 15, y: 12, width: 200, height: 25), pullsDown: false)
+            let colorKeys: [LocalizedKey] = [.colorBlue, .colorIndigo, .colorPurple, .colorPink, .colorRed, .colorOrange, .colorYellow, .colorGreen, .colorTeal, .colorGray]
             let colors = ["#4A90D9", "#5C6BC0", "#7E57C2", "#EC407A", "#EF5350", "#FF7043", "#FFCA28", "#66BB6A", "#26A69A", "#78909C"]
-            let colorNames = ["ブルー", "インディゴ", "パープル", "ピンク", "レッド", "オレンジ", "イエロー", "グリーン", "ティール", "グレー"]
-            for (index, name) in colorNames.enumerated() {
-                colorPopup.addItem(withTitle: name)
+            for (index, key) in colorKeys.enumerated() {
+                colorPopup.addItem(withTitle: L(key))
                 if colors[index] == SettingsManager.shared.defaultShelfColor {
                     colorPopup.selectItem(at: index)
                 }
             }
             colorPopup.target = self
-            colorPopup.action = #selector(colorPopupChanged(_:))
-            colorPopup.tag = 200
-            
-            colorStack.addArrangedSubview(colorLabel)
-            colorStack.addArrangedSubview(colorPopup)
-            cardView.addSubview(colorStack)
-            NSLayoutConstraint.activate([
-                colorStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 10),
-                colorStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 15)
-            ])
-            
-            return 50
-        })
+            colorPopup.action = #selector(self.colorPopupChanged(_:))
+            container.addSubview(colorPopup)
+        }
         
         // === ZIP Section ===
-        yOffset = addSectionCard(to: documentView, at: yOffset, title: "ZIP圧縮", content: { cardView in
-            let zipStack = NSStackView()
-            zipStack.orientation = .horizontal
-            zipStack.spacing = 8
-            zipStack.translatesAutoresizingMaskIntoConstraints = false
-            
-            let zipLabel = NSTextField(labelWithString: "保存先:")
-            let zipPopup = NSPopUpButton()
-            zipPopup.addItems(withTitles: ["ダウンロード", "デスクトップ", "毎回確認"])
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.zipSaveLocation), height: 50) { container in
+            let zipPopup = NSPopUpButton(frame: NSRect(x: 15, y: 12, width: 200, height: 25), pullsDown: false)
+            zipPopup.addItems(withTitles: [L(.downloads), L(.desktop), L(.askEachTime)])
             let locations = ["downloads", "desktop", "ask"]
             if let index = locations.firstIndex(of: SettingsManager.shared.zipSaveLocation) {
                 zipPopup.selectItem(at: index)
             }
             zipPopup.target = self
-            zipPopup.action = #selector(zipLocationChanged(_:))
-            zipPopup.tag = 300
-            
-            zipStack.addArrangedSubview(zipLabel)
-            zipStack.addArrangedSubview(zipPopup)
-            cardView.addSubview(zipStack)
-            NSLayoutConstraint.activate([
-                zipStack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 10),
-                zipStack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 15)
-            ])
-            
-            return 50
-        })
+            zipPopup.action = #selector(self.zipLocationChanged(_:))
+            container.addSubview(zipPopup)
+        }
         
         // === Startup Section ===
-        yOffset = addSectionCard(to: documentView, at: yOffset, title: "起動", content: { cardView in
-            let checkbox = NSButton(checkboxWithTitle: "ログイン時に起動", target: self, action: #selector(toggleLaunchAtLogin(_:)))
-            checkbox.state = SettingsManager.shared.isLaunchAtLoginEnabled ? .on : .off
-            checkbox.translatesAutoresizingMaskIntoConstraints = false
-            cardView.addSubview(checkbox)
-            NSLayoutConstraint.activate([
-                checkbox.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 10),
-                checkbox.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 15)
-            ])
-            
-            return 45
-        })
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.startup), height: 45) { container in
+            let checkbox = NSButton(checkboxWithTitle: L(.launchAtLogin), target: self, action: #selector(self.toggleLaunchAtLogin(_:)))
+            checkbox.state = UserDefaults.standard.bool(forKey: "launchAtLogin") ? .on : .off
+            checkbox.frame = NSRect(x: 15, y: 12, width: 200, height: 20)
+            container.addSubview(checkbox)
+        }
         
         // === Action Bar Section ===
-        yOffset = addSectionCard(to: documentView, at: yOffset, title: "アクションバー", content: { cardView in
-            let buttonLabels = ["全選択", "並替", "共有", "AirDrop", "コピー", "ペースト", "保存", "ZIP", "削除"]
+        yPos = addSection(to: documentView, yPos: yPos, title: L(.actionBar), height: 100) { container in
+            let buttonKeys: [LocalizedKey] = [.selectAll, .sort, .share, .airdrop, .copy, .paste, .save, .zip, .delete]
             let buttonIds = SettingsManager.allButtonIds
             let visibleButtons = SettingsManager.shared.visibleActionButtons
             
-            var checkboxes: [NSButton] = []
-            for (index, label) in buttonLabels.enumerated() {
-                let checkbox = NSButton(checkboxWithTitle: label, target: self, action: #selector(toggleActionButton(_:)))
+            for (index, key) in buttonKeys.enumerated() {
+                let checkbox = NSButton(checkboxWithTitle: L(key), target: self, action: #selector(self.toggleActionButton(_:)))
                 checkbox.state = visibleButtons.contains(buttonIds[index]) ? .on : .off
                 checkbox.tag = 500 + index
-                checkbox.translatesAutoresizingMaskIntoConstraints = false
-                cardView.addSubview(checkbox)
                 
                 let row = index / 3
                 let col = index % 3
-                NSLayoutConstraint.activate([
-                    checkbox.topAnchor.constraint(equalTo: cardView.topAnchor, constant: CGFloat(10 + row * 26)),
-                    checkbox.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: CGFloat(15 + col * 115))
-                ])
-                checkboxes.append(checkbox)
+                checkbox.frame = NSRect(x: CGFloat(15 + col * 120), y: CGFloat(65 - row * 28), width: 110, height: 20)
+                container.addSubview(checkbox)
+                self.buttonCheckboxes.append(checkbox)
             }
-            self.buttonCheckboxes = checkboxes
-            
-            return 90
-        })
+        }
         
-        // Set document view height
-        documentView.frame = NSRect(x: 0, y: 0, width: 380, height: yOffset + 20)
-        NSLayoutConstraint.activate([
-            documentView.widthAnchor.constraint(equalToConstant: 380)
-        ])
+        documentView.frame = NSRect(x: 0, y: 0, width: 400, height: yPos + 20)
     }
     
-    private func addSectionCard(to parent: NSView, at yOffset: CGFloat, title: String, content: (NSView) -> CGFloat) -> CGFloat {
-        let cardView = NSView()
-        cardView.wantsLayer = true
-        cardView.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
-        cardView.layer?.cornerRadius = 10
-        cardView.translatesAutoresizingMaskIntoConstraints = false
-        parent.addSubview(cardView)
-        
+    private func addSection(to parent: NSView, yPos: CGFloat, title: String, height: CGFloat, content: (NSView) -> Void) -> CGFloat {
         let titleLabel = NSTextField(labelWithString: title)
         titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         titleLabel.textColor = NSColor.secondaryLabelColor
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.frame = NSRect(x: 20, y: yPos, width: 200, height: 18)
         parent.addSubview(titleLabel)
         
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: parent.topAnchor, constant: yOffset),
-            titleLabel.leadingAnchor.constraint(equalTo: parent.leadingAnchor, constant: 20)
-        ])
+        let cardView = NSView(frame: NSRect(x: 15, y: yPos + 22, width: 370, height: height))
+        cardView.wantsLayer = true
+        cardView.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        cardView.layer?.cornerRadius = 10
+        parent.addSubview(cardView)
         
-        let contentHeight = content(cardView)
+        content(cardView)
         
-        NSLayoutConstraint.activate([
-            cardView.topAnchor.constraint(equalTo: parent.topAnchor, constant: yOffset + 22),
-            cardView.leadingAnchor.constraint(equalTo: parent.leadingAnchor, constant: 15),
-            cardView.trailingAnchor.constraint(equalTo: parent.trailingAnchor, constant: -15),
-            cardView.heightAnchor.constraint(equalToConstant: contentHeight)
-        ])
-        
-        return yOffset + 22 + contentHeight + 15
+        return yPos + 22 + height + 15
     }
     
     // MARK: - Actions
+    
+    @objc private func languageChanged(_ sender: NSPopUpButton) {
+        let index = sender.indexOfSelectedItem
+        let languages = AppLanguage.allCases
+        if index >= 0 && index < languages.count {
+            LocalizationManager.shared.currentLanguage = languages[index]
+            rebuildUI()
+        }
+    }
     
     @objc private func toggleActionButton(_ sender: NSButton) {
         let buttonIds = SettingsManager.allButtonIds
@@ -289,4 +232,8 @@ class SettingsWindowController: NSWindowController {
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
+}
+
+class FlippedView: NSView {
+    override var isFlipped: Bool { return true }
 }

@@ -74,22 +74,22 @@ class MenuBarView: NSView {
     
     private func showMenu() {
         let menu = NSMenu()
-        menu.addItem(withTitle: "New Shelf", action: #selector(AppDelegate.createNewShelf), keyEquivalent: "n")
+        menu.addItem(withTitle: L(.newShelf), action: #selector(AppDelegate.createNewShelf), keyEquivalent: "n")
         menu.addItem(NSMenuItem.separator())
         
         // Recent Shelves - opens popover
-        let recentItem = NSMenuItem(title: "Recent Shelves...", action: #selector(showRecentShelvesPopover), keyEquivalent: "")
+        let recentItem = NSMenuItem(title: L(.recentShelves), action: #selector(showRecentShelvesPopover), keyEquivalent: "")
         recentItem.target = self
         menu.addItem(recentItem)
         menu.addItem(NSMenuItem.separator())
         
         // Settings
-        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(showSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: L(.settings) + "...", action: #selector(showSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(withTitle: "Quit FloatingShelf", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.addItem(withTitle: L(.quit), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         
         // Position menu below the view
         let location = NSPoint(x: 0, y: 0)
